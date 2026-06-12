@@ -35,6 +35,10 @@ on:
         description: "Directory containing API collection files"
         type: string
         default: "API Collection"
+      prod-tag:
+        description: "Bruno tag used to filter tests when running against prod"
+        type: string
+        default: "prod-safe"
 
 permissions:
   contents: read
@@ -62,3 +66,4 @@ jobs:
       oidc-role-arn: ${{ inputs.oidc-role-arn }}
       environment: ${{ inputs.environment }}
       api-collection-dir: ${{ inputs.api-collection-dir }}
+      prod-tag: ${{ inputs.prod-tag }}
