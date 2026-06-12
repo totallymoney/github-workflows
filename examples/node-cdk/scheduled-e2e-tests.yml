@@ -13,4 +13,4 @@ jobs:
     uses: your-org/github-workflows/.github/workflows/workflows/node-cdk/scheduled-e2e-tests.yml@main
     with:
       aws-region: ${{ vars.AWS_REGION }}
-      oidc-role: ${{ vars.OIDC_ROLE_ARN }}
+      oidc-role-arn: ${{ vars.OIDC_ROLE_ARN }}

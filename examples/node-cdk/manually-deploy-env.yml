@@ -26,5 +26,5 @@ jobs:
       environment: ${{ inputs.environment }}
       node-version: ${{ vars.NODE_VERSION }}
       aws-region: ${{ vars.AWS_REGION }}
-      oidc-role: ${{ vars.OIDC_ROLE_ARN }}
+      oidc-role-arn: ${{ vars.OIDC_ROLE_ARN }}
       cdk-stack-name: ${{ vars.CDK_STACK_NAME }}

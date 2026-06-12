@@ -11,7 +11,7 @@ on:
         description: "AWS region to deploy to"
         type: string
         required: true
-      oidc-role:
+      oidc-role-arn:
         description: "OIDC role to assume"
         type: string
         required: true
@@ -56,7 +56,7 @@ jobs:
     uses: ./.github/workflows/jobs/cdk/job.deploy-env.yml
     with:
       aws-region: ${{ inputs.aws-region }}
-      oidc-role: ${{ inputs.oidc-role }}
+      oidc-role-arn: ${{ inputs.oidc-role-arn }}
       environment: pr-${{ github.event.pull_request.number }}
       node-version: ${{ inputs.node-version }}
       cdk-stack-name: ${{ inputs.cdk-stack-name }}
@@ -68,6 +68,6 @@ jobs:
     uses: ./.github/workflows/jobs/bruno/job.run-e2e-tests.yml
     with:
       aws-region: ${{ inputs.aws-region }}
-      oidc-role: ${{ inputs.oidc-role }}
+      oidc-role-arn: ${{ inputs.oidc-role-arn }}
       environment: pr-${{ github.event.pull_request.number }}
       api-collection-dir: ${{ inputs.api-collection-dir }}
