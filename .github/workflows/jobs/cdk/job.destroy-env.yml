@@ -24,7 +24,7 @@ on:
         type: string
         default: "app-stack"
       cdk-stack-name:
-        description: "Base name of the CDK stack (environment will be appended, e.g. 'tu-api' → 'tu-api-pr-123')"
+        description: "Base name of the CDK stack (environment will be appended, e.g. 'my-app' → 'my-app-pr-123')"
         type: string
         required: true
 
