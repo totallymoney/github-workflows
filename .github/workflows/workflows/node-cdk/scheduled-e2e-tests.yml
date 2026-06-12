@@ -1,0 +1,40 @@
+name: Scheduled E2E Tests
+
+on:
+  workflow_call:
+    inputs:
+      aws-region:
+        description: "AWS region to deploy to"
+        type: string
+        required: true
+      oidc-role:
+        description: "OIDC role to assume"
+        type: string
+        required: true
+      api-collection-dir:
+        description: "Directory containing API collection files"
+        type: string
+        default: "API Collection"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  e2e_tests_stage:
+    name: Run E2E Tests on Stage Environment
+    uses: ./.github/workflows/jobs/bruno/job.run-e2e-tests.yml
+    with:
+      aws-region: ${{ inputs.aws-region }}
+      oidc-role: ${{ inputs.oidc-role }}
+      environment: stage
+      api-collection-dir: ${{ inputs.api-collection-dir }}
+
+  e2e_tests_prod:
+    name: Run E2E Tests on Prod Environment
+    uses: ./.github/workflows/jobs/bruno/job.run-e2e-tests.yml
+    with:
+      aws-region: ${{ inputs.aws-region }}
+      oidc-role: ${{ inputs.oidc-role }}
+      environment: prod
+      api-collection-dir: ${{ inputs.api-collection-dir }}

@@ -1,0 +1,64 @@
+name: Manually Deploy Environment
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Release version to deploy (e.g. 0.1.42)"
+        type: string
+        required: true
+      environment:
+        description: "Environment to deploy to (e.g. stage, prod)"
+        type: string
+        required: true
+      node-version:
+        description: "Node version to use (e.g. 24)"
+        type: string
+        required: true
+      aws-region:
+        description: "AWS region to deploy to"
+        type: string
+        required: true
+      oidc-role:
+        description: "OIDC role to assume"
+        type: string
+        required: true
+      cdk-stack-name:
+        description: "Base name of the CDK stack"
+        type: string
+        required: true
+      cdk-dir:
+        description: "Directory containing CDK app"
+        type: string
+        default: "app-stack"
+      api-collection-dir:
+        description: "Directory containing API collection files"
+        type: string
+        default: "API Collection"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Deploy
+    uses: ./.github/workflows/jobs/cdk/job.deploy-env.yml
+    with:
+      aws-region: ${{ inputs.aws-region }}
+      oidc-role: ${{ inputs.oidc-role }}
+      environment: ${{ inputs.environment }}
+      node-version: ${{ inputs.node-version }}
+      cdk-stack-name: ${{ inputs.cdk-stack-name }}
+      cdk-dir: ${{ inputs.cdk-dir }}
+      release-version: ${{ inputs.version }}
+
+  e2e_tests:
+    name: Run E2E Tests
+    needs: [deploy]
+    uses: ./.github/workflows/jobs/bruno/job.run-e2e-tests.yml
+    with:
+      aws-region: ${{ inputs.aws-region }}
+      oidc-role: ${{ inputs.oidc-role }}
+      environment: ${{ inputs.environment }}
+      api-collection-dir: ${{ inputs.api-collection-dir }}

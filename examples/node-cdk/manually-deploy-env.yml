@@ -1,0 +1,30 @@
+name: Manually Deploy Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version to deploy (e.g. 0.1.42)"
+        type: string
+        required: true
+      environment:
+        description: "Environment to deploy to"
+        type: choice
+        options:
+          - stage
+          - prod
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    uses: your-org/github-workflows/.github/workflows/workflows/node-cdk/manually-deploy-env.yml@main
+    with:
+      version: ${{ inputs.version }}
+      environment: ${{ inputs.environment }}
+      node-version: ${{ vars.NODE_VERSION }}
+      aws-region: ${{ vars.AWS_REGION }}
+      oidc-role: ${{ vars.OIDC_ROLE_ARN }}
+      cdk-stack-name: ${{ vars.CDK_STACK_NAME }}

@@ -1,0 +1,17 @@
+name: Pull Request
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  ci:
+    uses: your-org/github-workflows/.github/workflows/workflows/node-cdk/pull-request.yml@main
+    with:
+      node-version: ${{ vars.NODE_VERSION }}
+      aws-region: ${{ vars.AWS_REGION }}
+      oidc-role: ${{ vars.OIDC_ROLE_ARN }}
+      cdk-stack-name: ${{ vars.CDK_STACK_NAME }}

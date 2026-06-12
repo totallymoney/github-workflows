@@ -1,0 +1,41 @@
+name: Tear Down Feature Environment
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: "Node version to use (e.g. 24)"
+        type: string
+        required: true
+      aws-region:
+        description: "AWS region to deploy to"
+        type: string
+        required: true
+      oidc-role:
+        description: "OIDC role to assume"
+        type: string
+        required: true
+      cdk-stack-name:
+        description: "Base name of the CDK stack"
+        type: string
+        required: true
+      cdk-dir:
+        description: "Directory containing CDK app"
+        type: string
+        default: "app-stack"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  destroy_feature:
+    name: Destroy Feature Environment
+    uses: ./.github/workflows/jobs/cdk/job.destroy-env.yml
+    with:
+      aws-region: ${{ inputs.aws-region }}
+      oidc-role: ${{ inputs.oidc-role }}
+      environment: pr-${{ github.event.pull_request.number }}
+      node-version: ${{ inputs.node-version }}
+      cdk-stack-name: ${{ inputs.cdk-stack-name }}
+      cdk-dir: ${{ inputs.cdk-dir }}

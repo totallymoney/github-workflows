@@ -1,0 +1,16 @@
+name: Scheduled E2E Tests
+
+on:
+  schedule:
+    - cron: 0 2 * * *
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  e2e:
+    uses: your-org/github-workflows/.github/workflows/workflows/node-cdk/scheduled-e2e-tests.yml@main
+    with:
+      aws-region: ${{ vars.AWS_REGION }}
+      oidc-role: ${{ vars.OIDC_ROLE_ARN }}

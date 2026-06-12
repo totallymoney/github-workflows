@@ -1,0 +1,29 @@
+name: Job - Run Integration Tests
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: "Node version needed (e.g. 24)"
+        type: string
+        required: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - name: Restore NPM packages
+        run: npm ci
+
+      - name: Run integration tests
+        run: npm run test:integration

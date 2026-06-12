@@ -1,0 +1,18 @@
+name: Tear Down Feature Environment
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  teardown:
+    uses: your-org/github-workflows/.github/workflows/workflows/node-cdk/teardown-feature.yml@main
+    with:
+      node-version: ${{ vars.NODE_VERSION }}
+      aws-region: ${{ vars.AWS_REGION }}
+      oidc-role: ${{ vars.OIDC_ROLE_ARN }}
+      cdk-stack-name: ${{ vars.CDK_STACK_NAME }}
