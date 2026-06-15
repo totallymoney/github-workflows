@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   ci:
-    uses: your-org/github-workflows/.github/workflows/workflows/node-cdk/pull-request.yml@main
+    uses: your-org/github-workflows/.github/workflows/workflows/node-cdk/pull-request.yml@v1
     with:
       node-version: ${{ vars.NODE_VERSION }}
       aws-region: ${{ vars.AWS_REGION }}

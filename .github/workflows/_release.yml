@@ -1,0 +1,27 @@
+# Internal workflow — not a reusable workflow for callers.
+#
+# Triggered when a versioned tag (e.g. v1.2.3) is pushed. Moves the floating
+# major version tag (e.g. v1) to point at the new release, so callers pinned
+# to @v1 automatically receive the update without changing their workflow files.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  update-floating-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Move major version tag
+        run: |
+          # Extract the major version from the tag, e.g. v1.2.3 → v1
+          MAJOR=$(echo "${{ github.ref_name }}" | cut -d. -f1)
+          git tag -f $MAJOR
+          git push -f origin $MAJOR

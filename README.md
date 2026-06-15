@@ -16,6 +16,21 @@ examples/           # Example caller workflows
   node-cdk/
 ```
 
+## Versioning
+
+This repo uses semantic versioning via git tags. Callers pin to a major version tag (e.g. `@v1`) which automatically receives backwards-compatible updates, or to an exact tag (e.g. `@v1.2.3`) to stay fully pinned.
+
+Breaking changes always bump the major version, so callers on `@v1` are never affected by a `v2` release.
+
+### Cutting a release
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+CI will automatically move the floating `v1` tag to point at the new release.
+
 ## Usage
 
 Copy the relevant example from `examples/` into your project's `.github/workflows/` directory and replace `your-org` with the actual org name.
