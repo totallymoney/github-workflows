@@ -32,9 +32,6 @@ permissions:
   contents: read
   id-token: write
 
-env:
-  ENVIRONMENT: pr-${{ github.event.pull_request.number }}
-
 jobs:
   format_check:
     name: Check Formatting
@@ -64,14 +61,14 @@ jobs:
     name: Deploy to Feature Environment
     runs-on: ubuntu-latest
     concurrency:
-      group: deploy-${{ env.ENVIRONMENT }}
+      group: deploy-pr-${{ github.event.pull_request.number }}
       cancel-in-progress: false
     steps:
       - uses: ./.github/actions/cdk/deploy-env
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
-          environment: ${{ env.ENVIRONMENT }}
+          environment: pr-${{ github.event.pull_request.number }}
           node-version: ${{ inputs.node-version }}
           cdk-stack-name: ${{ inputs.cdk-stack-name }}
           cdk-dir: ${{ inputs.cdk-dir }}
@@ -85,5 +82,5 @@ jobs:
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
-          environment: ${{ env.ENVIRONMENT }}
+          environment: pr-${{ github.event.pull_request.number }}
           api-collection-dir: ${{ inputs.api-collection-dir }}
