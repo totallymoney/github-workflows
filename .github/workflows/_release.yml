@@ -12,13 +12,16 @@ on:
 
 permissions:
   contents: write
-  workflows: write
 
 jobs:
   update-floating-tag:
     runs-on: ubuntu-latest
     steps:
+      # PAT with 'workflow' scope is required because the floating tag points to
+      # commits containing workflow files, which GITHUB_TOKEN cannot update.
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
 
       - name: Move major version tag
         run: |
