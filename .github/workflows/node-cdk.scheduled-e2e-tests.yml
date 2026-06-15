@@ -27,19 +27,23 @@ permissions:
 jobs:
   e2e_tests_stage:
     name: Run E2E Tests on Stage Environment
-    uses: ./.github/workflows/jobs/bruno/job.run-e2e-tests.yml
-    with:
-      aws-region: ${{ inputs.aws-region }}
-      oidc-role-arn: ${{ inputs.oidc-role-arn }}
-      environment: stage
-      api-collection-dir: ${{ inputs.api-collection-dir }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/bruno/run-e2e-tests
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          oidc-role-arn: ${{ inputs.oidc-role-arn }}
+          environment: stage
+          api-collection-dir: ${{ inputs.api-collection-dir }}
 
   e2e_tests_prod:
     name: Run E2E Tests on Prod Environment
-    uses: ./.github/workflows/jobs/bruno/job.run-e2e-tests.yml
-    with:
-      aws-region: ${{ inputs.aws-region }}
-      oidc-role-arn: ${{ inputs.oidc-role-arn }}
-      environment: prod
-      api-collection-dir: ${{ inputs.api-collection-dir }}
-      prod-tag: ${{ inputs.prod-tag }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/bruno/run-e2e-tests
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          oidc-role-arn: ${{ inputs.oidc-role-arn }}
+          environment: prod
+          api-collection-dir: ${{ inputs.api-collection-dir }}
+          prod-tag: ${{ inputs.prod-tag }}

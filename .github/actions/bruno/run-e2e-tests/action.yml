@@ -1,0 +1,47 @@
+name: Run End-to-End Tests
+
+inputs:
+  aws-region:
+    description: "AWS region to deploy to"
+    required: true
+  oidc-role-arn:
+    description: "OIDC role to assume"
+    required: true
+  environment:
+    description: "Environment to run tests against (e.g. stage, prod)"
+    required: true
+  api-collection-dir:
+    description: "Directory containing API collection files"
+    default: "API Collection"
+  prod-tag:
+    description: "Bruno tag used to filter tests when running against prod"
+    default: "prod-safe"
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v6.1.2
+      with:
+        role-to-assume: ${{ inputs.oidc-role-arn }}
+        aws-region: ${{ inputs.aws-region }}
+
+    - name: Install Bruno CLI
+      shell: bash
+      run: npm install -g @usebruno/cli@3.4.2
+
+    - name: Run API collection for Prod
+      if: ${{ inputs.environment == 'prod' }}
+      working-directory: ${{ inputs.api-collection-dir }}
+      shell: bash
+      run: bru run --env-var "envName=${{ inputs.environment }}" --tags "${{ inputs.prod-tag }}"
+
+    - name: Run API collection for Non-Prod
+      if: ${{ inputs.environment != 'prod' }}
+      working-directory: ${{ inputs.api-collection-dir }}
+      shell: bash
+      run: bru run --env-var "envName=${{ inputs.environment }}"

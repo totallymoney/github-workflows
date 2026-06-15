@@ -1,0 +1,64 @@
+name: Destroy Environment
+
+inputs:
+  aws-region:
+    description: "AWS region to deploy to"
+    required: true
+  oidc-role-arn:
+    description: "OIDC role to assume"
+    required: true
+  environment:
+    description: "Environment to destroy (e.g. pr-0)"
+    required: true
+  node-version:
+    description: "Node version to use"
+    required: true
+  cdk-dir:
+    description: "Directory containing CDK app"
+    default: "app-stack"
+  cdk-stack-name:
+    description: "Base name of the CDK stack (environment will be appended, e.g. 'my-app' → 'my-app-pr-123')"
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Set up Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+        cache-dependency-path: |
+          package-lock.json
+          ${{ inputs.cdk-dir }}/package-lock.json
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v6.1.2
+      with:
+        role-to-assume: ${{ inputs.oidc-role-arn }}
+        aws-region: ${{ inputs.aws-region }}
+
+    - name: Install root dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Install CDK dependencies
+      working-directory: ${{ inputs.cdk-dir }}
+      shell: bash
+      run: npm ci
+
+    - name: Destroy CDK stack
+      working-directory: ${{ inputs.cdk-dir }}
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+      shell: bash
+      run: |
+        if aws cloudformation describe-stacks --stack-name "${{ inputs.cdk-stack-name }}-${{ inputs.environment }}" 2>&1 | grep -q "does not exist"; then
+          echo "Stack does not exist, skipping destroy"
+        else
+          npx cdk destroy "${{ inputs.cdk-stack-name }}-${{ inputs.environment }}" --force
+        fi

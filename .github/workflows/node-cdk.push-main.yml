@@ -1,0 +1,98 @@
+name: Push to Main
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: "Node version to use (e.g. 24)"
+        type: string
+        required: true
+      aws-region:
+        description: "AWS region to deploy to"
+        type: string
+        required: true
+      oidc-role-arn:
+        description: "OIDC role to assume"
+        type: string
+        required: true
+      cdk-stack-name:
+        description: "Base name of the CDK stack"
+        type: string
+        required: true
+      cdk-dir:
+        description: "Directory containing CDK app"
+        type: string
+        default: "app-stack"
+      api-collection-dir:
+        description: "Directory containing API collection files"
+        type: string
+        default: "API Collection"
+      version-prefix:
+        description: "Version prefix for releases (e.g. '0.2' produces '0.2.{run_number}')"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  unit_tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/node/run-unit-tests
+        with:
+          node-version: ${{ inputs.node-version }}
+
+  integration_tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/node/run-integration-tests
+        with:
+          node-version: ${{ inputs.node-version }}
+
+  release:
+    name: Create Release
+    needs: [unit_tests, integration_tests]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - id: create_release
+        uses: ./.github/actions/node/create-release
+        with:
+          version-prefix: ${{ inputs.version-prefix }}
+    outputs:
+      version: ${{ steps.create_release.outputs.version }}
+
+  deploy:
+    name: Deploy to Stage Environment
+    needs: [release]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-stage
+      cancel-in-progress: false
+    steps:
+      - uses: ./.github/actions/cdk/deploy-env
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          oidc-role-arn: ${{ inputs.oidc-role-arn }}
+          environment: stage
+          node-version: ${{ inputs.node-version }}
+          cdk-stack-name: ${{ inputs.cdk-stack-name }}
+          cdk-dir: ${{ inputs.cdk-dir }}
+          release-version: ${{ needs.release.outputs.version }}
+
+  e2e_tests:
+    name: Run E2E Tests on Stage Environment
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/bruno/run-e2e-tests
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          oidc-role-arn: ${{ inputs.oidc-role-arn }}
+          environment: stage
+          api-collection-dir: ${{ inputs.api-collection-dir }}

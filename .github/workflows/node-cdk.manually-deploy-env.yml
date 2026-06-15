@@ -47,23 +47,30 @@ permissions:
 jobs:
   deploy:
     name: Deploy
-    uses: ./.github/workflows/jobs/cdk/job.deploy-env.yml
-    with:
-      aws-region: ${{ inputs.aws-region }}
-      oidc-role-arn: ${{ inputs.oidc-role-arn }}
-      environment: ${{ inputs.environment }}
-      node-version: ${{ inputs.node-version }}
-      cdk-stack-name: ${{ inputs.cdk-stack-name }}
-      cdk-dir: ${{ inputs.cdk-dir }}
-      release-version: ${{ inputs.version }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    steps:
+      - uses: ./.github/actions/cdk/deploy-env
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          oidc-role-arn: ${{ inputs.oidc-role-arn }}
+          environment: ${{ inputs.environment }}
+          node-version: ${{ inputs.node-version }}
+          cdk-stack-name: ${{ inputs.cdk-stack-name }}
+          cdk-dir: ${{ inputs.cdk-dir }}
+          release-version: ${{ inputs.version }}
 
   e2e_tests:
     name: Run E2E Tests
     needs: [deploy]
-    uses: ./.github/workflows/jobs/bruno/job.run-e2e-tests.yml
-    with:
-      aws-region: ${{ inputs.aws-region }}
-      oidc-role-arn: ${{ inputs.oidc-role-arn }}
-      environment: ${{ inputs.environment }}
-      api-collection-dir: ${{ inputs.api-collection-dir }}
-      prod-tag: ${{ inputs.prod-tag }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/bruno/run-e2e-tests
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          oidc-role-arn: ${{ inputs.oidc-role-arn }}
+          environment: ${{ inputs.environment }}
+          api-collection-dir: ${{ inputs.api-collection-dir }}
+          prod-tag: ${{ inputs.prod-tag }}

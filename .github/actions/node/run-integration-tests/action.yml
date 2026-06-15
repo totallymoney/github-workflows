@@ -1,0 +1,27 @@
+name: Run Integration Tests
+
+inputs:
+  node-version:
+    description: "Node version needed (e.g. 24)"
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Set up Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+
+    - name: Restore NPM packages
+      shell: bash
+      run: npm ci
+
+    - name: Run integration tests
+      shell: bash
+      run: npm run test:integration

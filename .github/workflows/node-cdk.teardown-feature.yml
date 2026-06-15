@@ -28,14 +28,22 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  ENVIRONMENT: pr-${{ github.event.pull_request.number }}
+
 jobs:
   destroy_feature:
     name: Destroy Feature Environment
-    uses: ./.github/workflows/jobs/cdk/job.destroy-env.yml
-    with:
-      aws-region: ${{ inputs.aws-region }}
-      oidc-role-arn: ${{ inputs.oidc-role-arn }}
-      environment: pr-${{ github.event.pull_request.number }}
-      node-version: ${{ inputs.node-version }}
-      cdk-stack-name: ${{ inputs.cdk-stack-name }}
-      cdk-dir: ${{ inputs.cdk-dir }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-${{ env.ENVIRONMENT }}
+      cancel-in-progress: false
+    steps:
+      - uses: ./.github/actions/cdk/destroy-env
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          oidc-role-arn: ${{ inputs.oidc-role-arn }}
+          environment: ${{ env.ENVIRONMENT }}
+          node-version: ${{ inputs.node-version }}
+          cdk-stack-name: ${{ inputs.cdk-stack-name }}
+          cdk-dir: ${{ inputs.cdk-dir }}
