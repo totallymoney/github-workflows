@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   e2e:
-    uses: your-org/github-workflows/.github/workflows/workflows/node-cdk/scheduled-e2e-tests.yml@v1
+    uses: totallymoney/github-workflows/.github/workflows/node-cdk.scheduled-e2e-tests.yml@v1
     with:
       aws-region: ${{ vars.AWS_REGION }}
       oidc-role-arn: ${{ vars.OIDC_ROLE_ARN }}

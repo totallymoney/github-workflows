@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   deploy:
-    uses: your-org/github-workflows/.github/workflows/workflows/node-cdk/manually-deploy-env.yml@v1
+    uses: totallymoney/github-workflows/.github/workflows/node-cdk.manually-deploy-env.yml@v1
     with:
       version: ${{ inputs.version }}
       environment: ${{ inputs.environment }}

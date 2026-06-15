@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   teardown:
-    uses: your-org/github-workflows/.github/workflows/workflows/node-cdk/teardown-feature.yml@v1
+    uses: totallymoney/github-workflows/.github/workflows/node-cdk.teardown-feature.yml@v1
     with:
       node-version: ${{ vars.NODE_VERSION }}
       aws-region: ${{ vars.AWS_REGION }}
