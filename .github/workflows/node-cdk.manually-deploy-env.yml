@@ -52,7 +52,7 @@ jobs:
       group: deploy-${{ inputs.environment }}
       cancel-in-progress: false
     steps:
-      - uses: totallymoney/github-workflows/.github/actions/cdk/deploy-env@main
+      - uses: totallymoney/github-workflows/.github/actions/cdk/deploy-env@v1
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
@@ -67,7 +67,7 @@ jobs:
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
-      - uses: totallymoney/github-workflows/.github/actions/bruno/run-e2e-tests@main
+      - uses: totallymoney/github-workflows/.github/actions/bruno/run-e2e-tests@v1
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
