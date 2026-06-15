@@ -36,7 +36,7 @@ jobs:
       group: deploy-pr-${{ github.event.pull_request.number }}
       cancel-in-progress: false
     steps:
-      - uses: ./.github/actions/cdk/destroy-env
+      - uses: totallymoney/github-workflows/.github/actions/cdk/destroy-env@main
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
