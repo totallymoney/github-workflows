@@ -15,3 +15,5 @@ jobs:
       aws-region: ${{ vars.AWS_REGION }}
       oidc-role-arn: ${{ vars.OIDC_ROLE_ARN }}
       cdk-stack-name: ${{ vars.CDK_STACK_NAME }}
+      # Optional: path to a docker-compose file to start before integration tests
+      # integration-tests-docker-compose-file: "docker-compose.yml"

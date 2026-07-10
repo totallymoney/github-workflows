@@ -4,6 +4,10 @@ inputs:
   node-version:
     description: "Node version needed (e.g. 24)"
     required: true
+  docker-compose-file:
+    description: "Path to a docker-compose file to start before tests (optional)"
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -21,6 +25,11 @@ runs:
     - name: Restore NPM packages
       shell: bash
       run: npm ci
+
+    - name: Start local service containers
+      if: inputs.docker-compose-file != ''
+      shell: bash
+      run: docker compose -f "${{ inputs.docker-compose-file }}" up -d --wait --wait-timeout 60
 
     - name: Run integration tests
       shell: bash

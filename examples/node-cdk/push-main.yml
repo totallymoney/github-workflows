@@ -18,3 +18,5 @@ jobs:
       oidc-role-arn: ${{ vars.OIDC_ROLE_ARN }}
       cdk-stack-name: ${{ vars.CDK_STACK_NAME }}
       version-prefix: "0.1"
+      # Optional: path to a docker-compose file to start before integration tests
+      # integration-tests-docker-compose-file: "docker-compose.yml"
