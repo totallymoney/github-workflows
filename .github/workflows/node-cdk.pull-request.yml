@@ -27,6 +27,10 @@ on:
         description: "Directory containing API collection files"
         type: string
         default: "API Collection"
+      integration-tests-docker-compose-file:
+        description: "Path to a docker-compose file to start before integration tests (optional)"
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -56,6 +60,7 @@ jobs:
       - uses: totallymoney/github-workflows/.github/actions/node/run-integration-tests@v1
         with:
           node-version: ${{ inputs.node-version }}
+          docker-compose-file: ${{ inputs.integration-tests-docker-compose-file }}
 
   deploy:
     name: Deploy to Feature Environment
