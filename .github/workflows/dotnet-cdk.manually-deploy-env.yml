@@ -40,9 +40,9 @@ on:
         type: string
         default: "prod-safe"
       artifact-name:
-        description: "Name of a prebuilt-code artifact to fetch before deploying. Omit for apps where CDK bundles the code itself (e.g. NodejsFunction)."
+        description: "Name of the prebuilt artifact (e.g. lambda-publish)"
         type: string
-        default: "lambda-publish"
+        required: true
       artifact-path:
         description: "Directory to extract the artifact into"
         type: string

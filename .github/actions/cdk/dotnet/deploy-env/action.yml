@@ -22,7 +22,7 @@ inputs:
     description: "Base name of the CDK stack (environment will be appended, e.g. 'my-app' → 'my-app-stage')"
     required: true
   artifact-name:
-    description: "Name of a prebuilt-code artifact to fetch before deploying. Omit for apps where CDK bundles the code itself (e.g. NodejsFunction)."
+    description: "Name of the prebuilt artifact (e.g. lambda-publish)"
     required: true
   artifact-path:
     description: "Directory to extract the artifact into"

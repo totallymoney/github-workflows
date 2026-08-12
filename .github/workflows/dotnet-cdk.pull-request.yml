@@ -47,6 +47,14 @@ on:
         description: "Name of the docker-compose service that runs the integration tests (default integration_tests)"
         type: string
         default: "integration_tests"
+      artifact-name:
+        description: "Name of the prebuilt artifact (e.g. lambda-publish)"
+        type: string
+        required: true
+      artifact-path:
+        description: "Directory to extract the artifact into"
+        type: string
+        default: "publish"
 
 permissions:
   contents: read
@@ -61,6 +69,8 @@ jobs:
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
           project-dir: ${{ inputs.source-project-dir }}
+          artifact-name: ${{ inputs.artifact-name }}
+          artifact-path: ${{ inputs.artifact-path }}
 
   unit_tests:
     name: Run Unit Tests

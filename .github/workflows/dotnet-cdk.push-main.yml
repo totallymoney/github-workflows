@@ -7,6 +7,10 @@ on:
         description: "Node version to use (e.g. 24)"
         type: string
         required: true
+      dotnet-version:
+        description: ".NET version to use (e.g. 10.x.x)"
+        type: string
+        required: true
       aws-region:
         description: "AWS region to deploy to"
         type: string
@@ -47,6 +51,14 @@ on:
         description: "Name of the docker-compose service that runs the integration tests (default integration_tests)"
         type: string
         default: "integration_tests"
+      artifact-name:
+        description: "Name of the prebuilt artifact (e.g. lambda-publish)"
+        type: string
+        required: true
+      artifact-path:
+        description: "Directory to extract the artifact into"
+        type: string
+        default: "publish"
 
 permissions:
   contents: read
@@ -61,6 +73,8 @@ jobs:
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
           project-dir: ${{ inputs.source-project-dir }}
+          artifact-name: ${{ inputs.artifact-name }}
+          artifact-path: ${{ inputs.artifact-path }}
 
   unit_tests:
     name: Run Unit Tests
@@ -88,7 +102,7 @@ jobs:
       contents: write
     steps:
       - id: create_release
-        uses: totallymoney/github-workflows/.github/actions/node/create-release@add-dotnet-support
+        uses: totallymoney/github-workflows/.github/actions/dotnet/create-release@add-dotnet-support
         with:
           version-prefix: ${{ inputs.version-prefix }}
           artifact-name: ${{ inputs.artifact-name }}

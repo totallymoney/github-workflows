@@ -8,7 +8,7 @@ inputs:
     description: "Directory containing project files (e.g. src/MyProject)"
     required: true
   artifact-name:
-    description: "Name to give the published Lambda artifact, attached to the release as a zip (e.g. 'lambda-publish' — pass the same value as deploy-env's artifact-name)"
+    description: "Name of the prebuilt artifact (e.g. lambda-publish)"
     required: true
   artifact-path:
     description: "Directory to extract the artifact into"
