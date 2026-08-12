@@ -1,0 +1,48 @@
+name: Create Release
+
+inputs:
+  version-prefix:
+    description: "Version prefix (e.g. '0.2' produces '0.2.{run_number}')"
+    required: true
+  artifact-name:
+    description: "Name to give the published Lambda artifact, attached to the release as a zip (e.g. 'lambda-publish' — pass the same value as deploy-env's artifact-name)"
+    default: true
+  artifact-path:
+    description: "Directory to extract the artifact into"
+    default: "publish"
+
+outputs:
+  version:
+    description: "The release version"
+    value: ${{ steps.setup.outputs.version }}
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup job variables
+      id: setup
+      env:
+        VERSION_PREFIX: ${{ inputs.version-prefix }}
+      shell: bash
+      run: echo "version=${VERSION_PREFIX}.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout code
+      uses: actions/checkout@
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.artifact-path }}/
+
+    - name: Zip published artifact
+      shell: bash
+      working-directory: ${{ inputs.artifact-path }}
+      run: zip -r "../${{ inputs.artifact-name }}.zip" .
+
+    - name: Create GitHub release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: gh release create "${{ steps.setup.outputs.version }}" "${{ inputs.artifact-name }}.zip" --generate-notes

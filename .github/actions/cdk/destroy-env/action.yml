@@ -1,3 +1,5 @@
+# Obsolete, use actions/cdk/node/deploy-env instead. They are identical but we're moving to
+# the cdk/node version as the action has node specific steps which wasn't clear initially.
 name: Destroy Environment
 
 inputs:

@@ -1,0 +1,47 @@
+name: Build Artifacts
+
+inputs:
+  dotnet-version:
+    description: ".NET version needed (e.g. 10.x.x)"
+    required: true
+  project-dir:
+    description: "Directory containing project files (e.g. src/MyProject)"
+    required: true
+  artifact-name:
+    description: "Name to give the published Lambda artifact, attached to the release as a zip (e.g. 'lambda-publish' — pass the same value as deploy-env's artifact-name)"
+    required: true
+  artifact-path:
+    description: "Directory to extract the artifact into"
+    default: "publish"
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+        cache: true
+        cache-dependency-path: Directory.Packages.props
+
+    - name: Restore .NET tools
+      shell: bash
+      run: dotnet tool restore
+
+    - name: Build solution
+      shell: bash
+      run: dotnet build -c Release
+
+    - name: Publish project
+      shell: bash
+      run: dotnet publish ${{ inputs.project-dir }} -c Release -o publish
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.artifact-path }}/

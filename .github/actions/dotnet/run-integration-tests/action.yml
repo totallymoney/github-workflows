@@ -1,0 +1,25 @@
+name: Run Integration Tests
+
+inputs:
+  docker-compose-file:
+    description: "Path to the docker-compose file (default docker-compose.yml)"
+    default: "docker-compose.yml"
+  test-service:
+    description: "Name of the docker-compose service that runs the integration tests (e.g. integration_tests). Its depends_on services are started and health-checked automatically."
+    default: "integration_tests"
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Pull images
+      shell: bash
+      continue-on-error: true
+      run: docker compose -f "${{ inputs.docker-compose-file }}" pull --quiet --ignore-pull-failures
+
+    - name: Run integration tests
+      shell: bash
+      run: docker compose -f "${{ inputs.docker-compose-file }}" run --rm "${{ inputs.test-service }}"
