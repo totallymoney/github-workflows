@@ -52,7 +52,7 @@ jobs:
       group: deploy-${{ inputs.environment }}
       cancel-in-progress: false
     steps:
-      - uses: totallymoney/github-workflows/.github/actions/cdk/node/deploy-env@add-dotnet-support
+      - uses: totallymoney/github-workflows/.github/actions/cdk/node/deploy-env@v1
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
