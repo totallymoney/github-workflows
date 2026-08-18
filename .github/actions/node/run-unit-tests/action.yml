@@ -22,7 +22,18 @@ runs:
       shell: bash
       run: npm ci
 
+    - name: Check for TypeScript config
+      id: typescript
+      shell: bash
+      run: |
+        if [ -f "tsconfig.json" ]; then
+          echo "has-tsconfig=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "has-tsconfig=false" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Validate code
+      if: steps.typescript.outputs.has-tsconfig == 'true'
       shell: bash
       run: npx tsc --noEmit
 
