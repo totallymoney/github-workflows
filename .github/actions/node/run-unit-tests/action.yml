@@ -24,7 +24,7 @@ runs:
 
     - name: Validate code
       shell: bash
-      run: npx tsc --noEmit
+      run: npx tsc --noEmit -p tsconfig.test.json
 
     - name: Run unit tests
       shell: bash
