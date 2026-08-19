@@ -1,5 +1,3 @@
-# Obsolete, use actions/cdk/node/deploy-env instead. They are identical but we're moving to
-# the cdk/node version as the action has node specific steps which wasn't clear initially.
 name: Deploy Environment
 
 inputs:
@@ -23,6 +21,12 @@ inputs:
   cdk-stack-name:
     description: "Base name of the CDK stack (environment will be appended, e.g. 'my-app' → 'my-app-stage')"
     required: true
+  artifact-name:
+    description: "Name of the prebuilt artifact (e.g. lambda-publish)"
+    required: true
+  artifact-path:
+    description: "Directory to extract the artifact into"
+    default: "publish"
 
 runs:
   using: composite
@@ -33,24 +37,38 @@ runs:
       with:
         ref: ${{ inputs.release-version || github.ref }}
 
+    # Used when deploying a specific release (e.g. push-main.yml's deploy job, or a manual
+    # deploy that targets an already-published version) — pulls the zip from the GitHub Release.
+    - name: Download artifact from release
+      if: inputs.release-version != ''
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release download "${{ inputs.release-version }}" --pattern "${{ inputs.artifact-name }}.zip"
+        unzip "${{ inputs.artifact-name }}.zip" -d "${{ inputs.artifact-path }}/"
+
+    # Used when no release-version is given (e.g. pull-request.yml's feature-env deploy) —
+    # pulls the artifact uploaded earlier in the same workflow run.
+    - name: Download artifact from previous job
+      if: inputs.release-version == ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.artifact-path }}/
+
     - name: Set up Node
       uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
         cache: npm
-        cache-dependency-path: |
-          package-lock.json
-          ${{ inputs.cdk-dir }}/package-lock.json
+        cache-dependency-path: ${{ inputs.cdk-dir }}/package-lock.json
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v6.1.2
       with:
         role-to-assume: ${{ inputs.oidc-role-arn }}
         aws-region: ${{ inputs.aws-region }}
-
-    - name: Install root dependencies
-      shell: bash
-      run: npm ci
 
     - name: Install CDK dependencies
       working-directory: ${{ inputs.cdk-dir }}

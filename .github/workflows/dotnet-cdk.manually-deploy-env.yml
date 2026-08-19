@@ -1,8 +1,16 @@
-name: Pull Request
+name: Manually Deploy Environment
 
 on:
   workflow_call:
     inputs:
+      version:
+        description: "Release version to deploy (e.g. 0.1.42)"
+        type: string
+        required: true
+      environment:
+        description: "Environment to deploy to (e.g. stage, prod)"
+        type: string
+        required: true
       node-version:
         description: "Node version to use (e.g. 24)"
         type: string
@@ -27,59 +35,45 @@ on:
         description: "Directory containing API collection files"
         type: string
         default: "API Collection"
-      integration-tests-docker-compose-file:
-        description: "Path to a docker-compose file to start before integration tests (optional)"
+      prod-tag:
+        description: "Bruno tag used to filter tests when running against prod"
         type: string
-        default: ""
+        default: "prod-safe"
+      artifact-name:
+        description: "Name of the prebuilt artifact (e.g. lambda-publish)"
+        type: string
+        required: true
+      artifact-path:
+        description: "Directory to extract the artifact into"
+        type: string
+        default: "publish"
 
 permissions:
   contents: read
   id-token: write
 
 jobs:
-  format_check:
-    name: Check Formatting
-    runs-on: ubuntu-latest
-    steps:
-      - uses: totallymoney/github-workflows/.github/actions/node/check-formatting@v1
-        with:
-          node-version: ${{ inputs.node-version }}
-
-  unit_tests:
-    name: Run Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: totallymoney/github-workflows/.github/actions/node/run-unit-tests@v1
-        with:
-          node-version: ${{ inputs.node-version }}
-
-  integration_tests:
-    name: Run Integration Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: totallymoney/github-workflows/.github/actions/node/run-integration-tests@v1
-        with:
-          node-version: ${{ inputs.node-version }}
-          docker-compose-file: ${{ inputs.integration-tests-docker-compose-file }}
-
   deploy:
-    name: Deploy to Feature Environment
+    name: Deploy
     runs-on: ubuntu-latest
     concurrency:
-      group: deploy-pr-${{ github.event.pull_request.number }}
+      group: deploy-${{ inputs.environment }}
       cancel-in-progress: false
     steps:
-      - uses: totallymoney/github-workflows/.github/actions/cdk/node/deploy-env@v1
+      - uses: totallymoney/github-workflows/.github/actions/cdk/dotnet/deploy-env@v1
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
-          environment: pr-${{ github.event.pull_request.number }}
+          environment: ${{ inputs.environment }}
           node-version: ${{ inputs.node-version }}
           cdk-stack-name: ${{ inputs.cdk-stack-name }}
           cdk-dir: ${{ inputs.cdk-dir }}
+          release-version: ${{ inputs.version }}
+          artifact-name: ${{ inputs.artifact-name }}
+          artifact-path: ${{ inputs.artifact-path }}
 
   e2e_tests:
-    name: Run E2E Tests on Feature Environment
+    name: Run E2E Tests
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
@@ -87,5 +81,6 @@ jobs:
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
-          environment: pr-${{ github.event.pull_request.number }}
+          environment: ${{ inputs.environment }}
           api-collection-dir: ${{ inputs.api-collection-dir }}
+          prod-tag: ${{ inputs.prod-tag }}

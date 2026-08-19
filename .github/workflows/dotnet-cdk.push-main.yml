@@ -7,6 +7,10 @@ on:
         description: "Node version to use (e.g. 24)"
         type: string
         required: true
+      dotnet-version:
+        description: ".NET version to use (e.g. 10.x.x)"
+        type: string
+        required: true
       aws-region:
         description: "AWS region to deploy to"
         type: string
@@ -31,44 +35,78 @@ on:
         description: "Version prefix for releases (e.g. '0.2' produces '0.2.{run_number}')"
         type: string
         required: true
-      integration-tests-docker-compose-file:
-        description: "Path to a docker-compose file to start before integration tests (optional)"
+      source-project-dir:
+        description: "Directory of the project containing the source files (e.g. src/MyProject)"
         type: string
-        default: ""
+        required: true
+      unit-tests-project-dir:
+        description: "Directory of the project to run unit tests for (e.g. tests/UnitTests)"
+        type: string
+        required: true
+      integration-tests-docker-compose-file:
+        description: "Path to the docker-compose file (default docker-compose.yml)"
+        type: string
+        default: "docker-compose.yml"
+      integration-tests-service:
+        description: "Name of the docker-compose service that runs the integration tests (default integration_tests)"
+        type: string
+        default: "integration_tests"
+      artifact-name:
+        description: "Name of the prebuilt artifact (e.g. lambda-publish)"
+        type: string
+        required: true
+      artifact-path:
+        description: "Directory to extract the artifact into"
+        type: string
+        default: "publish"
 
 permissions:
   contents: read
   id-token: write
 
 jobs:
+  build:
+    name: Build Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: totallymoney/github-workflows/.github/actions/dotnet/build-artifacts@v1
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+          project-dir: ${{ inputs.source-project-dir }}
+          artifact-name: ${{ inputs.artifact-name }}
+          artifact-path: ${{ inputs.artifact-path }}
+
   unit_tests:
     name: Run Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: totallymoney/github-workflows/.github/actions/node/run-unit-tests@v1
+      - uses: totallymoney/github-workflows/.github/actions/dotnet/run-unit-tests@v1
         with:
-          node-version: ${{ inputs.node-version }}
+          dotnet-version: ${{ inputs.dotnet-version }}
+          project-dir: ${{ inputs.unit-tests-project-dir }}
 
   integration_tests:
     name: Run Integration Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: totallymoney/github-workflows/.github/actions/node/run-integration-tests@v1
+      - uses: totallymoney/github-workflows/.github/actions/dotnet/run-integration-tests@v1
         with:
-          node-version: ${{ inputs.node-version }}
           docker-compose-file: ${{ inputs.integration-tests-docker-compose-file }}
+          test-service: ${{ inputs.integration-tests-service }}
 
   release:
     name: Create Release
-    needs: [unit_tests, integration_tests]
+    needs: [build, unit_tests, integration_tests]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - id: create_release
-        uses: totallymoney/github-workflows/.github/actions/node/create-release@v1
+        uses: totallymoney/github-workflows/.github/actions/dotnet/create-release@v1
         with:
           version-prefix: ${{ inputs.version-prefix }}
+          artifact-name: ${{ inputs.artifact-name }}
+          artifact-path: ${{ inputs.artifact-path }}
     outputs:
       version: ${{ steps.create_release.outputs.version }}
 
@@ -80,7 +118,7 @@ jobs:
       group: deploy-stage
       cancel-in-progress: false
     steps:
-      - uses: totallymoney/github-workflows/.github/actions/cdk/node/deploy-env@v1
+      - uses: totallymoney/github-workflows/.github/actions/cdk/dotnet/deploy-env@v1
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
@@ -89,6 +127,8 @@ jobs:
           cdk-stack-name: ${{ inputs.cdk-stack-name }}
           cdk-dir: ${{ inputs.cdk-dir }}
           release-version: ${{ needs.release.outputs.version }}
+          artifact-name: ${{ inputs.artifact-name }}
+          artifact-path: ${{ inputs.artifact-path }}
 
   e2e_tests:
     name: Run E2E Tests on Stage Environment

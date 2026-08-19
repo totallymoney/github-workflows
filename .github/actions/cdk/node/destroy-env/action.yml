@@ -1,6 +1,4 @@
-# Obsolete, use actions/cdk/node/deploy-env instead. They are identical but we're moving to
-# the cdk/node version as the action has node specific steps which wasn't clear initially.
-name: Deploy Environment
+name: Destroy Environment
 
 inputs:
   aws-region:
@@ -10,18 +8,16 @@ inputs:
     description: "OIDC role to assume"
     required: true
   environment:
-    description: "Environment to deploy (e.g. stage, prod)"
+    description: "Environment to destroy (e.g. pr-0)"
     required: true
   node-version:
     description: "Node version to use"
     required: true
-  release-version:
-    description: "Release version (e.g. 0.1.42 — from the GitHub Release tag). Only needed if deploying from a release."
   cdk-dir:
     description: "Directory containing CDK app"
     default: "app-stack"
   cdk-stack-name:
-    description: "Base name of the CDK stack (environment will be appended, e.g. 'my-app' → 'my-app-stage')"
+    description: "Base name of the CDK stack (environment will be appended, e.g. 'my-app' → 'my-app-pr-123')"
     required: true
 
 runs:
@@ -30,8 +26,6 @@ runs:
   steps:
     - name: Checkout code
       uses: actions/checkout@v6
-      with:
-        ref: ${{ inputs.release-version || github.ref }}
 
     - name: Set up Node
       uses: actions/setup-node@v6
@@ -57,10 +51,14 @@ runs:
       shell: bash
       run: npm ci
 
-    - name: Deploy CDK stack
+    - name: Destroy CDK stack
       working-directory: ${{ inputs.cdk-dir }}
       env:
-        VERSION: ${{ inputs.release-version || '0.0.0' }}
         ENVIRONMENT: ${{ inputs.environment }}
       shell: bash
-      run: npx cdk deploy "${{ inputs.cdk-stack-name }}-${{ inputs.environment }}" --require-approval never
+      run: |
+        if aws cloudformation describe-stacks --stack-name "${{ inputs.cdk-stack-name }}-${{ inputs.environment }}" 2>&1 | grep -q "does not exist"; then
+          echo "Stack does not exist, skipping destroy"
+        else
+          npx cdk destroy "${{ inputs.cdk-stack-name }}-${{ inputs.environment }}" --force
+        fi

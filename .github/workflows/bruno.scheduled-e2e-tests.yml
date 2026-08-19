@@ -1,5 +1,3 @@
-# Obsolete, use bruno.scheduled-e2e-tests instead. They are identical but we're moving to
-# the bruno version as there's nothing specific to node-cdk in here.
 name: Scheduled E2E Tests
 
 on:
