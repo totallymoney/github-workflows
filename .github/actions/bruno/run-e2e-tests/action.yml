@@ -10,6 +10,10 @@ inputs:
   environment:
     description: "Environment to run tests against (e.g. stage, prod)"
     required: true
+  env-vars:
+    description: "Additional Bruno --env-var values, one per line as key=value"
+    required: false
+    default: ""
   api-collection-dir:
     description: "Directory containing API collection files"
     default: "API Collection"
@@ -38,10 +42,26 @@ runs:
       if: ${{ inputs.environment == 'prod' }}
       working-directory: ${{ inputs.api-collection-dir }}
       shell: bash
-      run: bru run --env-var "envName=${{ inputs.environment }}" --tags "${{ inputs.prod-tag }}"
+      env:
+        BRUNO_ENVIRONMENT: ${{ inputs.environment }}
+        BRUNO_EXTRA_VARS: ${{ inputs.env-vars }}
+      run: |
+        args=(--env-var "envName=$BRUNO_ENVIRONMENT")
+        while IFS= read -r line; do
+          [ -n "$line" ] && args+=(--env-var "$line")
+        done <<< "$BRUNO_EXTRA_VARS"
+        bru run "${args[@]}" --tags "${{ inputs.prod-tag }}"
 
     - name: Run API collection for Non-Prod
       if: ${{ inputs.environment != 'prod' }}
       working-directory: ${{ inputs.api-collection-dir }}
       shell: bash
-      run: bru run --env-var "envName=${{ inputs.environment }}"
+      env:
+        BRUNO_ENVIRONMENT: ${{ inputs.environment }}
+        BRUNO_EXTRA_VARS: ${{ inputs.env-vars }}
+      run: |
+        args=(--env-var "envName=$BRUNO_ENVIRONMENT")
+        while IFS= read -r line; do
+          [ -n "$line" ] && args+=(--env-var "$line")
+        done <<< "$BRUNO_EXTRA_VARS"
+        bru run "${args[@]}"
