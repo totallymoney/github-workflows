@@ -59,6 +59,20 @@ on:
         description: "Directory to extract the artifact into"
         type: string
         default: "publish"
+      e2e-env-vars-script:
+        description: >
+          Optional shell script run before E2E tests. Write key=value lines
+          to the 'env-vars' output (via $GITHUB_OUTPUT) to inject extra
+          Bruno --env-var values. $ENVIRONMENT is available to the script
+          (e.g. stage).
+        type: string
+        required: false
+        default: ""
+      e2e-env-vars-script-needs-aws:
+        description: "Whether e2e-env-vars-script needs AWS credentials configured before it runs"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -135,9 +149,25 @@ jobs:
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
+      - name: Configure AWS credentials
+        if: ${{ inputs.e2e-env-vars-script-needs-aws }}
+        uses: aws-actions/configure-aws-credentials@v6.1.2
+        with:
+          role-to-assume: ${{ inputs.oidc-role-arn }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Resolve extra env vars
+        id: extra-env-vars
+        if: ${{ inputs.e2e-env-vars-script != '' }}
+        shell: bash
+        env:
+          ENVIRONMENT: stage
+        run: ${{ inputs.e2e-env-vars-script }}
+
       - uses: totallymoney/github-workflows/.github/actions/bruno/run-e2e-tests@v1
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
           environment: stage
           api-collection-dir: ${{ inputs.api-collection-dir }}
+          env-vars: ${{ steps.extra-env-vars.outputs.env-vars }}
