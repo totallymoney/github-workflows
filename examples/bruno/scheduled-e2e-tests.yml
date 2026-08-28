@@ -14,3 +14,4 @@ jobs:
     with:
       aws-region: ${{ vars.AWS_REGION }}
       oidc-role-arn: ${{ vars.OIDC_ROLE_ARN }}
+      # sandbox-developer-mode: true # only if pre-request/post-response scripts need external npm packages or filesystem/network access

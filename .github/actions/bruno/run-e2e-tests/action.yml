@@ -20,6 +20,10 @@ inputs:
   prod-tag:
     description: "Bruno tag used to filter tests when running against prod"
     default: "prod-safe"
+  sandbox-developer-mode:
+    description: "Run Bruno in developer sandbox mode (--sandbox developer) instead of the default safe mode. Needed when pre-request/post-response scripts require external npm packages or filesystem/network access (e.g. seeding a database via the AWS SDK). Only enable for collections you trust, since scripts get full Node.js access."
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -45,11 +49,13 @@ runs:
       env:
         BRUNO_ENVIRONMENT: ${{ inputs.environment }}
         BRUNO_EXTRA_VARS: ${{ inputs.env-vars }}
+        BRUNO_SANDBOX_DEVELOPER_MODE: ${{ inputs.sandbox-developer-mode }}
       run: |
         args=(--env-var "envName=$BRUNO_ENVIRONMENT")
         while IFS= read -r line; do
           [ -n "$line" ] && args+=(--env-var "$line")
         done <<< "$BRUNO_EXTRA_VARS"
+        [ "$BRUNO_SANDBOX_DEVELOPER_MODE" = "true" ] && args+=(--sandbox developer)
         bru run "${args[@]}" --tags "${{ inputs.prod-tag }}"
 
     - name: Run API collection for Non-Prod
@@ -59,9 +65,11 @@ runs:
       env:
         BRUNO_ENVIRONMENT: ${{ inputs.environment }}
         BRUNO_EXTRA_VARS: ${{ inputs.env-vars }}
+        BRUNO_SANDBOX_DEVELOPER_MODE: ${{ inputs.sandbox-developer-mode }}
       run: |
         args=(--env-var "envName=$BRUNO_ENVIRONMENT")
         while IFS= read -r line; do
           [ -n "$line" ] && args+=(--env-var "$line")
         done <<< "$BRUNO_EXTRA_VARS"
+        [ "$BRUNO_SANDBOX_DEVELOPER_MODE" = "true" ] && args+=(--sandbox developer)
         bru run "${args[@]}"
