@@ -169,7 +169,7 @@ jobs:
           ENVIRONMENT: stage
         run: ${{ inputs.e2e-env-vars-script }}
 
-      - uses: totallymoney/github-workflows/.github/actions/bruno/run-e2e-tests@v1
+      - uses: totallymoney/github-workflows/.github/actions/bruno/run-e2e-tests@v2
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
