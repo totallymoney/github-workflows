@@ -42,6 +42,19 @@ runs:
       shell: bash
       run: npm install -g @usebruno/cli@3.4.2
 
+    - name: Install collection script dependencies
+      if: ${{ inputs.sandbox-developer-mode == 'true' }}
+      working-directory: ${{ inputs.api-collection-dir }}
+      shell: bash
+      run: |
+        if [ -f package.json ]; then
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+        fi
+
     - name: Run API collection for Prod
       if: ${{ inputs.environment == 'prod' }}
       working-directory: ${{ inputs.api-collection-dir }}
