@@ -33,7 +33,7 @@ jobs:
     name: Run E2E Tests on Stage Environment
     runs-on: ubuntu-latest
     steps:
-      - uses: totallymoney/github-workflows/.github/actions/bruno/run-e2e-tests@v1
+      - uses: totallymoney/github-workflows/.github/actions/bruno/run-e2e-tests@v2
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
@@ -45,7 +45,7 @@ jobs:
     name: Run E2E Tests on Prod Environment
     runs-on: ubuntu-latest
     steps:
-      - uses: totallymoney/github-workflows/.github/actions/bruno/run-e2e-tests@v1
+      - uses: totallymoney/github-workflows/.github/actions/bruno/run-e2e-tests@v2
         with:
           aws-region: ${{ inputs.aws-region }}
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
