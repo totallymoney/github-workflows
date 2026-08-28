@@ -35,6 +35,11 @@ on:
         description: "Path to a docker-compose file to start before integration tests (optional)"
         type: string
         default: ""
+      e2e-sandbox-developer-mode:
+        description: "Run Bruno E2E tests in developer sandbox mode (--sandbox developer) instead of the default safe mode. Needed when pre-request/post-response scripts require external npm packages or filesystem/network access. Only enable for collections you trust."
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -101,3 +106,4 @@ jobs:
           oidc-role-arn: ${{ inputs.oidc-role-arn }}
           environment: stage
           api-collection-dir: ${{ inputs.api-collection-dir }}
+          sandbox-developer-mode: ${{ inputs.e2e-sandbox-developer-mode }}
