@@ -69,6 +69,11 @@ on:
         type: boolean
         required: false
         default: false
+      e2e-sandbox-developer-mode:
+        description: "Run Bruno E2E tests in developer sandbox mode (--sandbox developer) instead of the default safe mode. Needed when pre-request/post-response scripts require external npm packages or filesystem/network access. Only enable for collections you trust."
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -150,3 +155,4 @@ jobs:
           environment: pr-${{ github.event.pull_request.number }}
           api-collection-dir: ${{ inputs.api-collection-dir }}
           env-vars: ${{ steps.extra-env-vars.outputs.env-vars }}
+          sandbox-developer-mode: ${{ inputs.e2e-sandbox-developer-mode }}

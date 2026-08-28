@@ -25,3 +25,5 @@ jobs:
       # Optional: docker-compose file/service to start before integration tests
       # integration-tests-docker-compose-file: "docker-compose.yml"
       # integration-tests-service: "integration_tests"
+      # Optional: run Bruno E2E tests in developer sandbox mode (needed for scripts using external npm packages or filesystem/network access)
+      # e2e-sandbox-developer-mode: true
