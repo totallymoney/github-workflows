@@ -27,6 +27,11 @@ on:
         description: "Directory containing API collection files"
         type: string
         default: "API Collection"
+      run-e2e-tests:
+        description: "Whether to run the Bruno E2E tests after deploying. Disable for services with no API collection to test (e.g. queue-driven Lambdas)"
+        type: boolean
+        required: false
+        default: true
       integration-tests-docker-compose-file:
         description: "Path to a docker-compose file to start before integration tests (optional)"
         type: string
@@ -86,6 +91,7 @@ jobs:
   e2e_tests:
     name: Run E2E Tests on Feature Environment
     needs: [deploy]
+    if: ${{ inputs.run-e2e-tests }}
     runs-on: ubuntu-latest
     steps:
       - uses: totallymoney/github-workflows/.github/actions/bruno/run-e2e-tests@v2

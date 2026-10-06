@@ -24,3 +24,5 @@ jobs:
       # integration-tests-service: "integration_tests"
       # Optional: run Bruno E2E tests in developer sandbox mode (needed for scripts using external npm packages or filesystem/network access)
       # e2e-sandbox-developer-mode: true
+      # Optional: skip the Bruno E2E tests, for services with no API collection to test (e.g. queue-driven Lambdas)
+      # run-e2e-tests: false

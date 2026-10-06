@@ -29,3 +29,5 @@ jobs:
       oidc-role-arn: ${{ vars.OIDC_ROLE_ARN }}
       cdk-stack-name: ${{ vars.CDK_STACK_NAME }}
       artifact-name: "lambda-publish"
+      # Optional: skip the Bruno E2E tests, for services with no API collection to test (e.g. queue-driven Lambdas)
+      # run-e2e-tests: false
